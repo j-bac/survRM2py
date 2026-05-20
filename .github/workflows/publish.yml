@@ -15,7 +15,7 @@ jobs:
         uses: prefix-dev/setup-pixi@v0.8.0
         with:
           pixi-version: v0.18.0
-          cache-environment: true
+          cache: true
           
       - name: Run tests
         run: pixi run -e test test
@@ -52,6 +52,7 @@ jobs:
         uses: prefix-dev/setup-pixi@v0.8.0
         with:
           pixi-version: v0.18.0
+          cache: true
           
       - name: Build Conda Package
         run: |
