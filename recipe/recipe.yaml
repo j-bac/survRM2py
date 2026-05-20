@@ -1,0 +1,41 @@
+package:
+  name: survrm2py
+  version: 0.1.0
+
+context:
+  version: 0.1.0
+
+source:
+  path: ..
+
+build:
+  number: 0
+  noarch: python
+  script: python -m pip install . --no-deps --no-build-isolation -vv
+
+requirements:
+  host:
+    - python >=3.9
+    - hatchling
+    - pip
+  run:
+    - python >=3.9
+    - numpy >=1.20
+    - pandas >=1.3
+    - statsmodels >=0.13
+    - patsy >=0.5
+    - scipy >=1.7
+    - lifelines >=0.27
+
+test:
+  imports:
+    - survrm2py
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://github.com/j-bac/survRM2py
+  license: GPL-3.0-or-later
+  summary: Python translation of survRM2 for Restricted Mean Survival Time (RMST) analysis
