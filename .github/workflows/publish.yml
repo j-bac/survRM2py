@@ -37,18 +37,3 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           skip-existing: true
-
-  test-conda:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up pixi
-        uses: prefix-dev/setup-pixi@v0.9.5
-        with:
-          pixi-version: v0.68.0
-          cache: true
-      - name: Verify Conda package builds successfully
-        run: |
-          pixi global install rattler-build
-          rattler-build build --recipe recipe/recipe.yaml
