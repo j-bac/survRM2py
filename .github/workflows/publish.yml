@@ -1,4 +1,4 @@
-name: Publish to PyPI and Conda
+name: Publish to PyPI and Test Conda
 
 on:
   release:
@@ -10,13 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
       - name: Set up pixi
         uses: prefix-dev/setup-pixi@v0.9.5
         with:
           pixi-version: v0.68.0
           cache: true
-          
       - name: Run tests
         run: pixi run -e test test
 
@@ -24,37 +22,35 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     permissions:
-      id-token: write  # Trusted Publishing
+      id-token: write
     steps:
       - uses: actions/checkout@v4
-      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          
       - name: Install build
         run: pip install build
-        
       - name: Build package
         run: python -m build
-        
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
 
-  publish-conda:
+  # Renamed from publish-conda to just test-conda
+  test-conda:
     needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
       - name: Set up pixi
         uses: prefix-dev/setup-pixi@v0.9.5
         with:
           pixi-version: v0.68.0
           cache: true
-          
-      - name: Build Conda Package
+      - name: Verify Conda package builds successfully
+        # We just build it to make sure the recipe is valid. We don't upload it.
         run: |
           pixi global install rattler-build
           rattler-build build --recipe recipe/recipe.yaml
