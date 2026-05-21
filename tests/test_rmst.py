@@ -8,6 +8,7 @@ from scipy.stats import norm
 from survrm2py.rmst import exact_rmst1, rmst2reg, rmst, func_surv
 from survrm2py.rmst_r import rmst_r
 
+
 # =====================================================================
 # 3. PYTEST FIXTURES
 # =====================================================================
@@ -174,13 +175,19 @@ def test_unadjusted_rmst(real_survival_data):
     np.testing.assert_almost_equal(res_py["ci_unadjusted_upper"], res_r["ci_unadjusted_upper"], decimal=10)
 
 
+# =====================================================================
+# UPDATED INTEGRATION TESTS (Adapted to Formula-Only API)
+# =====================================================================
+
+
 def test_adjusted_rmst_single_covariate(real_survival_data):
     df = real_survival_data
     tau = 2500.0
     covs = ["age"]
+    formula = "arm + " + " + ".join(covs)  # Translates to "arm + age"
 
-    res_r = rmst_r(df, "time", "event", "arm", tau, covariates=covs)
-    res_py = rmst(df, "time", "event", "arm", tau, covariates=covs)
+    res_r = rmst_r(df, "time", "event", "arm", tau, formula=formula)
+    res_py = rmst(df, "time", "event", "arm", tau, formula=formula)
 
     pd.testing.assert_frame_equal(
         res_py["adjusted_summary"].set_index("covariate"),
@@ -195,9 +202,10 @@ def test_adjusted_rmst_multiple_covariates(real_survival_data):
     df = real_survival_data
     tau = 2000.0
     covs = ["age", "bili", "protime"]
+    formula = "arm + " + " + ".join(covs)  # Translates to "arm + age + bili + protime"
 
-    res_r = rmst_r(df, "time", "event", "arm", tau, covariates=covs)
-    res_py = rmst(df, "time", "event", "arm", tau, covariates=covs)
+    res_r = rmst_r(df, "time", "event", "arm", tau, formula=formula)
+    res_py = rmst(df, "time", "event", "arm", tau, formula=formula)
 
     pd.testing.assert_frame_equal(
         res_py["adjusted_summary"].set_index("covariate"),
@@ -228,12 +236,51 @@ def test_rmst2_official_sample_data(rmst2_sample_data):
 
     # --- 2. Test Adjusted ---
     covs = ["mock_cov"]
-    res_r_adj = rmst_r(df, "time", "event", "arm", tau, covariates=covs)
-    res_py_adj = rmst(df, "time", "event", "arm", tau, covariates=covs)
+    formula = "arm + " + " + ".join(covs)  # Translates to "arm + mock_cov"
+    res_r_adj = rmst_r(df, "time", "event", "arm", tau, formula=formula)
+    res_py_adj = rmst(df, "time", "event", "arm", tau, formula=formula)
 
     pd.testing.assert_frame_equal(
         res_py_adj["adjusted_summary"].set_index("covariate"),
         res_r_adj["adjusted_summary"].set_index("covariate"),
+        check_dtype=False,
+        atol=1e-10,
+        rtol=1e-10,
+    )
+
+
+def test_adjusted_rmst_interaction_formulas(real_survival_data, rmst2_sample_data):
+    """
+    Directly asserts that Python's patsy and R's model.matrix process
+    and evaluate covariate-by-treatment interactions identically.
+    """
+    # 1. Test real survival data (PBC) with interaction: "arm * age"
+    df_real = real_survival_data
+    tau_real = 2000.0
+    formula_real = "arm * age"
+
+    res_r_real = rmst_r(df_real, "time", "event", "arm", tau_real, formula=formula_real)
+    res_py_real = rmst(df_real, "time", "event", "arm", tau_real, formula=formula_real)
+
+    pd.testing.assert_frame_equal(
+        res_py_real["adjusted_summary"].set_index("covariate"),
+        res_r_real["adjusted_summary"].set_index("covariate"),
+        check_dtype=False,
+        atol=1e-10,
+        rtol=1e-10,
+    )
+
+    # 2. Test official sample data with interaction: "arm * mock_cov"
+    df_sample = rmst2_sample_data
+    tau_sample = 10.0
+    formula_sample = "arm * mock_cov"
+
+    res_r_sample = rmst_r(df_sample, "time", "event", "arm", tau_sample, formula=formula_sample)
+    res_py_sample = rmst(df_sample, "time", "event", "arm", tau_sample, formula=formula_sample)
+
+    pd.testing.assert_frame_equal(
+        res_py_sample["adjusted_summary"].set_index("covariate"),
+        res_r_sample["adjusted_summary"].set_index("covariate"),
         check_dtype=False,
         atol=1e-10,
         rtol=1e-10,

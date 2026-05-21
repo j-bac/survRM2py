@@ -4,6 +4,7 @@ import statsmodels.api as sm
 import patsy
 from scipy.stats import norm
 
+
 # --- 1. Python Native RMST Implementation ---
 def exact_rmst1(y, d, tau):
     """
@@ -188,21 +189,25 @@ def rmst2reg(y, delta, X_matrix, arm, tau):
     return beta0, varbeta
 
 
-def rmst(df, time_col, event_col, arm_col, tau, covariates=None, formula=None, method="ipcw_rmst2", alpha=0.05):
+def rmst(df, time_col, event_col, arm_col, tau, formula=None, method="ipcw_rmst2", alpha=0.05):
+    """
+    Performs unadjusted and adjusted RMST comparisons.
+    Adjusted analysis is handled exclusively using patsy formulas to prevent collinearity bugs.
+    """
     if method in ["pseudo", "ipcw"]:
         try:
             from lifelines import KaplanMeierFitter
             from lifelines.utils import restricted_mean_survival_time
         except ImportError:
             raise ImportError("Please install lifelines for method 'pseudo' or 'ipcw': pip install lifelines")
-    
+
     T = df[time_col].values.astype(float)
     E = df[event_col].values.astype(float)
     arm = df[arm_col].values.astype(float)
     n = len(T)
     results = {}
 
-    # 1. Unadjusted RMST (Always use exact_rmst1 for consistent variance)
+    # 1. Unadjusted RMST (Always use exact_rmst1)
     idx1, idx0 = (arm == 1), (arm == 0)
     rmst_arm1, var_arm1 = exact_rmst1(T[idx1], E[idx1], tau)
     rmst_arm0, var_arm0 = exact_rmst1(T[idx0], E[idx0], tau)
@@ -221,20 +226,13 @@ def rmst(df, time_col, event_col, arm_col, tau, covariates=None, formula=None, m
     results["ci_unadjusted_lower"] = diff_unadj - z_alpha * se_unadj
     results["ci_unadjusted_upper"] = diff_unadj + z_alpha * se_unadj
 
-    # 2. Adjusted RMST
-    if (covariates is not None and len(covariates) > 0) or (formula is not None):
-        # Build Design Matrix (Formula vs List)
-        if formula is not None:
-            # Patsy creates the matrix, handles interactions (e.g. A*B), and adds intercept automatically
-            dmatrix = patsy.dmatrix(formula, df, return_type="dataframe")
-            X_matrix = np.asarray(dmatrix)
-            var_names = dmatrix.design_info.column_names
-        else:
-            X_cols = [arm_col] + covariates
-            X_matrix = sm.add_constant(df[X_cols].values.astype(float))
-            var_names = ["Intercept"] + X_cols
+    # 2. Adjusted RMST (Formula Only)
+    if formula is not None:
+        # Patsy creates the matrix, handles interactions, and adds intercept automatically
+        dmatrix = patsy.dmatrix(formula, df, return_type="dataframe")
+        X_matrix = np.asarray(dmatrix)
+        var_names = dmatrix.design_info.column_names
 
-        # Initialize standard variables to be populated by the chosen method
         coefs, ses, p_vals, ci_lows, ci_highs = None, None, None, None, None
 
         if method == "pseudo":
@@ -270,7 +268,6 @@ def rmst(df, time_col, event_col, arm_col, tau, covariates=None, formula=None, m
             ci_lows, ci_highs = model.conf_int(alpha=alpha).T
 
         elif method == "ipcw_rmst2":
-            # X_matrix natively handles intercepts and interactions now!
             beta0, varbeta = rmst2reg(T, E, X_matrix, arm, tau)
             coefs = beta0
             ses = np.sqrt(np.diag(varbeta))
@@ -279,23 +276,26 @@ def rmst(df, time_col, event_col, arm_col, tau, covariates=None, formula=None, m
             ci_lows = coefs - z_alpha * ses
             ci_highs = coefs + z_alpha * ses
 
+        alpha_pct = int((1 - alpha) * 100)
         adjusted_summary = pd.DataFrame(
             {
+                "covariate": var_names,
                 "coef": coefs,
                 "se(coef)": ses,
-                "z": z_stats,
+                "z": coefs / ses,
                 "p": p_vals,
-                f"lower .{int((1 - alpha) * 100)}": ci_lows,
-                f"upper .{int((1 - alpha) * 100)}": ci_highs,
-            },
-            index=var_names,
+                f"lower .{alpha_pct}": ci_lows,
+                f"upper .{alpha_pct}": ci_highs,
+            }
         )
 
         adjusted_summary.index.name = "covariate"
-        adjusted_summary = adjusted_summary.reset_index()
+        adjusted_summary = adjusted_summary.reset_index(drop=True)
 
-        results["rmst_diff_adjusted"] = coefs[1]
-        results["p_adjusted"] = p_vals[1]
+        # Dynamically locate the treatment coefficient index
+        arm_idx = var_names.index(arm_col) if arm_col in var_names else 1
+        results["rmst_diff_adjusted"] = coefs[arm_idx]
+        results["p_adjusted"] = p_vals[arm_idx]
         results["adjusted_summary"] = adjusted_summary
 
     return results

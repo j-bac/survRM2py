@@ -43,7 +43,7 @@ results = rmst(
     event_col="event",
     arm_col="arm",
     tau=8.0,
-    covariates=["age"],
+    formula="age", # the formula api instead of covariates list used in the original R package for flexibility
     method="ipcw_rmst2"
 )
 
