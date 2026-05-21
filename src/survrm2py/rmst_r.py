@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import patsy
 import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri, numpy2ri
 from rpy2.robjects.conversion import localconverter
@@ -7,8 +8,7 @@ from rpy2.robjects.conversion import localconverter
 
 def rmst_r(df, time_col, event_col, arm_col, tau, formula=None, alpha=0.05):
     """
-    R Wrapper. Aligned exclusively to formula-based evaluations with a
-    strict fix for the R-side treatment collinearity trap.
+    R Wrapper.
     """
     r_df = df.rename(columns={time_col: "time", event_col: "event", arm_col: "arm"})
 
@@ -35,6 +35,17 @@ def rmst_r(df, time_col, event_col, arm_col, tau, formula=None, alpha=0.05):
     # Adjusted RMST (Formula Only)
     if formula is not None:
         # Translate Python formula's arm column to R's standardized "arm" name
+        dmatrix = patsy.dmatrix(formula, df, return_type="dataframe")
+        var_names = dmatrix.design_info.column_names
+
+        # Non-brittle, parsed validation check
+        if arm_col not in var_names:
+            raise ValueError(
+                f"The treatment column '{arm_col}' must be explicitly included as a main effect in your formula "
+                f"(e.g., '{arm_col} + covariates' or '{arm_col} * covariates')."
+            )
+
+        # Map Python's arm column to R's standardized "arm" name inside R's formula
         r_formula = formula.replace(arm_col, "arm")
         ro.globalenv["formula_str"] = f"~ {r_formula}"
 
@@ -50,8 +61,6 @@ def rmst_r(df, time_col, event_col, arm_col, tau, formula=None, alpha=0.05):
         """)
 
         # Get column names from Patsy directly to ensure exact variable labelling matches
-        import patsy
-
         dmatrix = patsy.dmatrix(formula, df, return_type="dataframe")
         var_names = dmatrix.design_info.column_names
 
