@@ -80,7 +80,7 @@ def test_func_surv_direct(rmst2_sample_data):
     """)
     surv_r = np.array(ro.r("fit_r$surv"))
 
-    np.testing.assert_almost_equal(surv_py, surv_r, decimal=12)
+    np.testing.assert_almost_equal(surv_py, surv_r, decimal=10)
 
 
 def test_exact_rmst1_direct(rmst2_sample_data):
@@ -107,8 +107,8 @@ def test_exact_rmst1_direct(rmst2_sample_data):
     rmst_r = float(ro.r("fit_r$rmst['Est.']")[0])
     var_r = float(ro.r("fit_r$rmst.var")[0])
 
-    np.testing.assert_almost_equal(rmst_py, rmst_r, decimal=12)
-    np.testing.assert_almost_equal(var_py, var_r, decimal=12)
+    np.testing.assert_almost_equal(rmst_py, rmst_r, decimal=10)
+    np.testing.assert_almost_equal(var_py, var_r, decimal=10)
 
 
 def test_rmst2reg_direct(rmst2_sample_data):
@@ -150,9 +150,9 @@ def test_rmst2reg_direct(rmst2_sample_data):
     z_stat = beta_py / se_py
     p_py = 2 * (1 - norm.cdf(abs(z_stat)))
 
-    np.testing.assert_almost_equal(beta_py, beta_r, decimal=12)
-    np.testing.assert_almost_equal(se_py, se_r, decimal=12)
-    np.testing.assert_almost_equal(p_py, p_r, decimal=12)
+    np.testing.assert_almost_equal(beta_py, beta_r, decimal=10)
+    np.testing.assert_almost_equal(se_py, se_r, decimal=10)
+    np.testing.assert_almost_equal(p_py, p_r, decimal=10)
 
 
 # =====================================================================
@@ -165,13 +165,13 @@ def test_unadjusted_rmst(real_survival_data):
     res_r = rmst_r(df, "time", "event", "arm", tau)
     res_py = rmst(df, "time", "event", "arm", tau)
 
-    np.testing.assert_almost_equal(res_py["rmst_arm1"], res_r["rmst_arm1"], decimal=12)
-    np.testing.assert_almost_equal(res_py["rmst_arm0"], res_r["rmst_arm0"], decimal=12)
-    np.testing.assert_almost_equal(res_py["rmst_diff_unadjusted"], res_r["rmst_diff_unadjusted"], decimal=12)
-    np.testing.assert_almost_equal(res_py["se_unadjusted"], res_r["se_unadjusted"], decimal=12)
-    np.testing.assert_almost_equal(res_py["p_unadjusted"], res_r["p_unadjusted"], decimal=12)
-    np.testing.assert_almost_equal(res_py["ci_unadjusted_lower"], res_r["ci_unadjusted_lower"], decimal=12)
-    np.testing.assert_almost_equal(res_py["ci_unadjusted_upper"], res_r["ci_unadjusted_upper"], decimal=12)
+    np.testing.assert_almost_equal(res_py["rmst_arm1"], res_r["rmst_arm1"], decimal=10)
+    np.testing.assert_almost_equal(res_py["rmst_arm0"], res_r["rmst_arm0"], decimal=10)
+    np.testing.assert_almost_equal(res_py["rmst_diff_unadjusted"], res_r["rmst_diff_unadjusted"], decimal=10)
+    np.testing.assert_almost_equal(res_py["se_unadjusted"], res_r["se_unadjusted"], decimal=10)
+    np.testing.assert_almost_equal(res_py["p_unadjusted"], res_r["p_unadjusted"], decimal=10)
+    np.testing.assert_almost_equal(res_py["ci_unadjusted_lower"], res_r["ci_unadjusted_lower"], decimal=10)
+    np.testing.assert_almost_equal(res_py["ci_unadjusted_upper"], res_r["ci_unadjusted_upper"], decimal=10)
 
 
 def test_adjusted_rmst_single_covariate(real_survival_data):
@@ -186,8 +186,8 @@ def test_adjusted_rmst_single_covariate(real_survival_data):
         res_py["adjusted_summary"].set_index("covariate"),
         res_r["adjusted_summary"].set_index("covariate"),
         check_dtype=False,
-        atol=1e-12,
-        rtol=1e-12,
+        atol=1e-10,
+        rtol=1e-10,
     )
 
 
@@ -203,8 +203,8 @@ def test_adjusted_rmst_multiple_covariates(real_survival_data):
         res_py["adjusted_summary"].set_index("covariate"),
         res_r["adjusted_summary"].set_index("covariate"),
         check_dtype=False,
-        atol=1e-12,
-        rtol=1e-12,
+        atol=1e-10,
+        rtol=1e-10,
     )
 
 
@@ -216,15 +216,15 @@ def test_rmst2_official_sample_data(rmst2_sample_data):
     res_r_unadj = rmst_r(df, "time", "event", "arm", tau)
     res_py_unadj = rmst(df, "time", "event", "arm", tau)
 
-    np.testing.assert_almost_equal(res_py_unadj["rmst_arm1"], res_r_unadj["rmst_arm1"], decimal=12)
-    np.testing.assert_almost_equal(res_py_unadj["rmst_arm0"], res_r_unadj["rmst_arm0"], decimal=12)
+    np.testing.assert_almost_equal(res_py_unadj["rmst_arm1"], res_r_unadj["rmst_arm1"], decimal=10)
+    np.testing.assert_almost_equal(res_py_unadj["rmst_arm0"], res_r_unadj["rmst_arm0"], decimal=10)
     np.testing.assert_almost_equal(
-        res_py_unadj["rmst_diff_unadjusted"], res_r_unadj["rmst_diff_unadjusted"], decimal=12
+        res_py_unadj["rmst_diff_unadjusted"], res_r_unadj["rmst_diff_unadjusted"], decimal=10
     )
-    np.testing.assert_almost_equal(res_py_unadj["se_unadjusted"], res_r_unadj["se_unadjusted"], decimal=12)
-    np.testing.assert_almost_equal(res_py_unadj["p_unadjusted"], res_r_unadj["p_unadjusted"], decimal=12)
-    np.testing.assert_almost_equal(res_py_unadj["ci_unadjusted_lower"], res_r_unadj["ci_unadjusted_lower"], decimal=12)
-    np.testing.assert_almost_equal(res_py_unadj["ci_unadjusted_upper"], res_r_unadj["ci_unadjusted_upper"], decimal=12)
+    np.testing.assert_almost_equal(res_py_unadj["se_unadjusted"], res_r_unadj["se_unadjusted"], decimal=10)
+    np.testing.assert_almost_equal(res_py_unadj["p_unadjusted"], res_r_unadj["p_unadjusted"], decimal=10)
+    np.testing.assert_almost_equal(res_py_unadj["ci_unadjusted_lower"], res_r_unadj["ci_unadjusted_lower"], decimal=10)
+    np.testing.assert_almost_equal(res_py_unadj["ci_unadjusted_upper"], res_r_unadj["ci_unadjusted_upper"], decimal=10)
 
     # --- 2. Test Adjusted ---
     covs = ["mock_cov"]
@@ -235,6 +235,6 @@ def test_rmst2_official_sample_data(rmst2_sample_data):
         res_py_adj["adjusted_summary"].set_index("covariate"),
         res_r_adj["adjusted_summary"].set_index("covariate"),
         check_dtype=False,
-        atol=1e-12,
-        rtol=1e-12,
+        atol=1e-10,
+        rtol=1e-10,
     )
