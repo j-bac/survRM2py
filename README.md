@@ -1,6 +1,5 @@
 # survRM2py
 
-[![Publish to PyPI](https://github.com/j-bac/survRM2py/actions/workflows/publish.yml/badge.svg)](https://github.com/j-bac/survRM2py/actions/workflows/publish.yml)
 [![PyPI version](https://img.shields.io/pypi/v/survrm2py.svg)](https://pypi.org/project/survrm2py/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
