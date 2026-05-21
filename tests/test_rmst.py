@@ -5,8 +5,8 @@ import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri, numpy2ri
 from rpy2.robjects.conversion import localconverter
 from scipy.stats import norm
-from survrm2py.rmst import exact_rmst1, rmst2reg, run_rmst, func_surv
-from survrm2py.rmst_r import run_rmst_r
+from survrm2py.rmst import exact_rmst1, rmst2reg, rmst, func_surv
+from survrm2py.rmst_r import rmst_r
 
 # =====================================================================
 # 3. PYTEST FIXTURES
@@ -162,8 +162,8 @@ def test_unadjusted_rmst(real_survival_data):
     df = real_survival_data
     tau = 3000.0
 
-    res_r = run_rmst_r(df, "time", "event", "arm", tau)
-    res_py = run_rmst(df, "time", "event", "arm", tau)
+    res_r = rmst_r(df, "time", "event", "arm", tau)
+    res_py = rmst(df, "time", "event", "arm", tau)
 
     np.testing.assert_almost_equal(res_py["rmst_arm1"], res_r["rmst_arm1"], decimal=12)
     np.testing.assert_almost_equal(res_py["rmst_arm0"], res_r["rmst_arm0"], decimal=12)
@@ -179,8 +179,8 @@ def test_adjusted_rmst_single_covariate(real_survival_data):
     tau = 2500.0
     covs = ["age"]
 
-    res_r = run_rmst_r(df, "time", "event", "arm", tau, covariates=covs)
-    res_py = run_rmst(df, "time", "event", "arm", tau, covariates=covs)
+    res_r = rmst_r(df, "time", "event", "arm", tau, covariates=covs)
+    res_py = rmst(df, "time", "event", "arm", tau, covariates=covs)
 
     pd.testing.assert_frame_equal(
         res_py["adjusted_summary"].set_index("covariate"),
@@ -196,8 +196,8 @@ def test_adjusted_rmst_multiple_covariates(real_survival_data):
     tau = 2000.0
     covs = ["age", "bili", "protime"]
 
-    res_r = run_rmst_r(df, "time", "event", "arm", tau, covariates=covs)
-    res_py = run_rmst(df, "time", "event", "arm", tau, covariates=covs)
+    res_r = rmst_r(df, "time", "event", "arm", tau, covariates=covs)
+    res_py = rmst(df, "time", "event", "arm", tau, covariates=covs)
 
     pd.testing.assert_frame_equal(
         res_py["adjusted_summary"].set_index("covariate"),
@@ -213,8 +213,8 @@ def test_rmst2_official_sample_data(rmst2_sample_data):
     tau = 10.0
 
     # --- 1. Test Unadjusted ---
-    res_r_unadj = run_rmst_r(df, "time", "event", "arm", tau)
-    res_py_unadj = run_rmst(df, "time", "event", "arm", tau)
+    res_r_unadj = rmst_r(df, "time", "event", "arm", tau)
+    res_py_unadj = rmst(df, "time", "event", "arm", tau)
 
     np.testing.assert_almost_equal(res_py_unadj["rmst_arm1"], res_r_unadj["rmst_arm1"], decimal=12)
     np.testing.assert_almost_equal(res_py_unadj["rmst_arm0"], res_r_unadj["rmst_arm0"], decimal=12)
@@ -228,8 +228,8 @@ def test_rmst2_official_sample_data(rmst2_sample_data):
 
     # --- 2. Test Adjusted ---
     covs = ["mock_cov"]
-    res_r_adj = run_rmst_r(df, "time", "event", "arm", tau, covariates=covs)
-    res_py_adj = run_rmst(df, "time", "event", "arm", tau, covariates=covs)
+    res_r_adj = rmst_r(df, "time", "event", "arm", tau, covariates=covs)
+    res_py_adj = rmst(df, "time", "event", "arm", tau, covariates=covs)
 
     pd.testing.assert_frame_equal(
         res_py_adj["adjusted_summary"].set_index("covariate"),

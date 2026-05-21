@@ -4,7 +4,7 @@ import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri, numpy2ri
 from rpy2.robjects.conversion import localconverter
 
-def run_rmst_r(df, time_col, event_col, arm_col, tau, covariates=None, alpha=0.05):
+def rmst_r(df, time_col, event_col, arm_col, tau, covariates=None, alpha=0.05):
     r_df = df.rename(columns={time_col: "time", event_col: "event", arm_col: "arm"})
 
     ro.r("suppressPackageStartupMessages(library(survRM2))")

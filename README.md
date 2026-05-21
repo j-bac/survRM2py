@@ -4,21 +4,9 @@
 [![PyPI version](https://img.shields.io/pypi/v/survrm2py.svg)](https://pypi.org/project/survrm2py/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-`survRM2py` is a Python reimplementation of the popular R package **`survRM2`** for Restricted Mean Survival Time (RMST) analysis. It is designed to achieve absolute mathematical parity with the R reference implementation while providing a clean, modern Pythonic interface.
+`survRM2py` is a Python reimplementation of the popular R package [survRM2](https://cran.r-project.org/web/packages/survRM2/index.html) for Restricted Mean Survival Time (RMST) analysis. It is designed to achieve absolute mathematical parity with the R reference implementation.
 
 RMST is a robust alternative to the hazard ratio for comparing survival curves, representing the average survival time up to a pre-specified time point (tau).
-
----
-
-## Features
-
-- **Exact R Translation**: Matches CRAN's `survRM2` package logic, including exact Greenwood variance calculations and IPCW regression.
-- **Adjusted RMST Analysis**:
-  - Direct translation of `rmst2reg` (IPCW-based regression, type='difference').
-  - Pseudo-value regression (`method="pseudo"`).
-  - Standard IPCW regression (`method="ipcw"`).
-- **Formula Interfaces**: Uses `patsy` to handle R-style formula specifications and complex interactions natively in Python.
-- **Reproducible Dev Environment**: Built with Pixi for super-fast conda environment solves and dependency management.
 
 ---
 
@@ -83,7 +71,7 @@ curl -fsSL https://pixi.sh/install.sh | bash
 ```
 
 ### Running Tests
-The test environment automatically sets up Python, R, and installs the reference `survRM2` package from CRAN to run comprehensive comparison validations.
+The test environment automatically sets up Python, R, and installs the reference `survRM2` package from CRAN.
 ```bash
 pixi run -e test test
 ```
@@ -100,3 +88,8 @@ Built files will be generated under the `dist/` directory.
 ## License
 
 This package is licensed under the **GNU General Public License v3 or later (GPLv3+)**, which maintains consistency with CRAN's `survRM2` licensing.
+
+## References
+Uno H, Claggett B, Tian L, Inoue E, Gallo P, Miyata T, Schrag D, Takeuchi M, Uyama Y, Zhao L, Skali H, Solomon S, Jacobus S, HughesM, Packer M, Wei LJ. Moving beyond the hazard ratio in quantifying the between-group difference in survival analysis. Journal of clinical Oncology 2014, 32, 2380-2385. doi:10.1200/JCO.2014.55.2208.
+
+Tian L, Zhao L, Wei LJ. Predicting the restricted mean event time with the subject's baseline covariates in survival analysis. Biostatistics 2014, 15, 222-233. doi:10.1093/biostatistics/kxt050.

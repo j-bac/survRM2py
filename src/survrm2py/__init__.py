@@ -1,3 +1,3 @@
-from .rmst import run_rmst, exact_rmst1, rmst2reg
+from .rmst import rmst, exact_rmst1, rmst2reg
 
-__all__ = ["run_rmst", "exact_rmst1", "rmst2reg"]
+__all__ = ["rmst", "exact_rmst1", "rmst2reg"]

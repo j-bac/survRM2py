@@ -191,7 +191,7 @@ def rmst2reg(y, delta, X_matrix, arm, tau):
     return beta0, varbeta
 
 
-def run_rmst(df, time_col, event_col, arm_col, tau, covariates=None, formula=None, method="ipcw_rmst2", alpha=0.05):
+def rmst(df, time_col, event_col, arm_col, tau, covariates=None, formula=None, method="ipcw_rmst2", alpha=0.05):
     T = df[time_col].values.astype(float)
     E = df[event_col].values.astype(float)
     arm = df[arm_col].values.astype(float)
