@@ -24,7 +24,7 @@ pip install survrm2py
 ```python
 import numpy as np
 import pandas as pd
-from survrm2py import run_rmst
+from survrm2py import rmst
 
 # 1. Create mock survival data
 np.random.seed(42)
@@ -37,7 +37,7 @@ data = pd.DataFrame({
 })
 
 # 2. Run unadjusted and covariate-adjusted RMST at tau = 8.0
-results = run_rmst(
+results = rmst(
     df=data,
     time_col="time",
     event_col="event",
