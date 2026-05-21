@@ -59,9 +59,7 @@ python-build = "*"
 [tool.pixi.tasks]
 setup-r = "Rscript -e 'if (!requireNamespace(\"survRM2\", quietly = TRUE)) install.packages(\"survRM2\", repos = \"https://cloud.r-project.org\")'"
 build = "python -m build"
-
-[tool.pixi.tasks]
-test = { cmd = "PYTHONPATH=src pytest", depends-on = ["setup-r"] }
+test = { cmd = "PYTHONPATH=src pytest -v", depends-on = ["setup-r"] }
 
 [tool.pixi.environments]
 default = { solve-group = "default" }
