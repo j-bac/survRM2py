@@ -3,9 +3,6 @@ import pandas as pd
 import statsmodels.api as sm
 import patsy
 from scipy.stats import norm
-from lifelines import KaplanMeierFitter
-from lifelines.utils import restricted_mean_survival_time
-
 
 # --- 1. Python Native RMST Implementation ---
 def exact_rmst1(y, d, tau):
@@ -192,6 +189,13 @@ def rmst2reg(y, delta, X_matrix, arm, tau):
 
 
 def rmst(df, time_col, event_col, arm_col, tau, covariates=None, formula=None, method="ipcw_rmst2", alpha=0.05):
+    if method in ["pseudo", "ipcw"]:
+        try:
+            from lifelines import KaplanMeierFitter
+            from lifelines.utils import restricted_mean_survival_time
+        except ImportError:
+            raise ImportError("Please install lifelines for method 'pseudo' or 'ipcw': pip install lifelines")
+    
     T = df[time_col].values.astype(float)
     E = df[event_col].values.astype(float)
     arm = df[arm_col].values.astype(float)
