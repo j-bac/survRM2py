@@ -249,12 +249,6 @@ def rmst(df, time_col, event_col, arm_col, tau, formula=None, method="ipcw_rmst2
                 f"(e.g., '{clean_arm_col} + covariates' or '{clean_arm_col} * covariates')."
             )
 
-        if arm_col not in var_names:
-            raise ValueError(
-                f"The treatment column '{arm_col}' must be explicitly included as a main effect in formula "
-                f"(e.g., '{arm_col} + covariates' or '{arm_col} * covariates')."
-            )
-
         coefs, ses, p_vals, ci_lows, ci_highs = None, None, None, None, None
 
         if method == "pseudo":
