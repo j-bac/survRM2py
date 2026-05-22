@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 import patsy
+import re
 from scipy.stats import norm
 
 
@@ -232,6 +233,21 @@ def rmst(df, time_col, event_col, arm_col, tau, formula=None, method="ipcw_rmst2
         dmatrix = patsy.dmatrix(formula, df, return_type="dataframe")
         X_matrix = np.asarray(dmatrix)
         var_names = dmatrix.design_info.column_names
+
+        # Helper to strip Q("...") wrappers and [T.True] suffixes for clean matching
+        def _clean_patsy(name):
+            name = re.sub(r'Q\("([^"]+)"\)', r'\1', name)
+            name = name.replace('`', '')
+            return re.sub(r'\[T\.[^\]]+\]', '', name)
+
+        clean_var_names = [_clean_patsy(v) for v in var_names]
+        clean_arm_col = _clean_patsy(arm_col)
+
+        if clean_arm_col not in clean_var_names:
+            raise ValueError(
+                f"The treatment column '{clean_arm_col}' must be explicitly included as a main effect in formula "
+                f"(e.g., '{clean_arm_col} + covariates' or '{clean_arm_col} * covariates')."
+            )
 
         if arm_col not in var_names:
             raise ValueError(
